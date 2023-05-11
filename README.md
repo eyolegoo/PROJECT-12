@@ -12,7 +12,7 @@
 
 - Let us see how you can improve your Ansible code!
 
-- ## ***Step 1 – Jenkins job enhancement***
+- ***Step 1 – Jenkins job enhancement***
 
 - Before we begin, let us make some changes to our Jenkins job – now every new change in the codes creates a separate directory which is not very convenient when we want to run some commands from one place. Besides, it consumes space on Jenkins serves with each subsequent change. Let us enhance it by introducing a new Jenkins project/job – we will require [Copy Artifact](https://plugins.jenkins.io/copyartifact/) plugin.
 
@@ -46,7 +46,7 @@
 
 ## ***REFACTOR ANSIBLE CODE BY IMPORTING OTHER PLAYBOOKS INTO SITE.YML***
 
-## ***Step 2 – Refactor Ansible code by importing other playbooks into site.yml***
+***Step 2 – Refactor Ansible code by importing other playbooks into site.yml***
 
 - Before starting to refactor the codes, ensure that you have pulled down the latest code from **master** (main) branch, and created a new branch, name it **refactor**.
 
@@ -132,7 +132,7 @@ ansible-playbook -i inventory/dev.yml playbooks/site.yml
 - Now you have learned how to use ***import_playbooks*** module and you have a ready solution to install/delete packages on multiple servers with just one command.
 
 
-## ***CONFIGURE UAT WEBSERVERS WITH A ROLE ‘WEBSERVER’***
+***CONFIGURE UAT WEBSERVERS WITH A ROLE ‘WEBSERVER’***
 
 ***Step 3 – Configure UAT Webservers with a role ‘Webserver’***
 
@@ -265,3 +265,53 @@ ansible-galaxy init webserver
     path: /var/www/html/html
     state: absent
 ```
+
+***REFERENCE WEBSERVER ROLE***
+
+***Step 4 – Reference ‘Webserver’ role***
+
+- Within the ***static-assignments*** folder, create a new assignment for **uat-webservers** ***uat-webservers.yml***. This is where you will reference the role.
+
+```
+---
+- hosts: uat-webservers
+  roles:
+     - webserver
+```
+
+- Remember that the entry point to our ansible configuration is the ***site.yml*** file. Therefore, you need to refer your ***uat-webservers.yml*** role inside ***site.yml***.
+
+- So, we should have this in ***site.yml***
+
+```
+---
+- hosts: all
+- import_playbook: ../static-assignments/common.yml
+
+- hosts: uat-webservers
+- import_playbook: ../static-assignments/uat-webservers.yml
+```
+
+***Step 5 – Commit & Test***
+
+- Commit your changes, create a Pull Request and merge them to ***master*** branch, make sure webhook triggered two consequent Jenkins jobs, they ran successfully and copied all the files to your ***Jenkins-Ansible*** server into ***/home/ubuntu/ansible-config-mgt/*** directory.
+
+- Now run the playbook against your uat inventory and see what happens:
+
+`sudo ansible-playbook -i /home/ubuntu/ansible-config-mgt/inventory/uat.yml /home/ubuntu/ansible-config-mgt/playbooks/site.yml`
+
+- You should be able to see both of your UAT Web servers configured and you can try to reach them from your browser:
+
+`http://<Web1-UAT-Server-Public-IP-or-Public-DNS-Name>/index.php` or `http://<Web1-UAT-Server-Public-IP-or-Public-DNS-Name>/index.php`
+
+- **Your Ansible architecture now looks like this**:
+
+<img width="394" alt="Final Arch" src="https://github.com/eyolegoo/PROJECT-12/assets/115954100/29907b28-632e-44ef-94d0-c96fd21af149">
+
+- In Project 13, you will see the difference between **Static** and **Dynamic assignments**.
+
+- Congratulations!
+
+- You have learned how to deploy and configure UAT Web Servers using Ansible **imports** and **roles**!
+
+
